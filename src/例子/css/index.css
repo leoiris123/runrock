@@ -1,0 +1,21 @@
+.container {
+  overflow: hidden;
+}
+
+.line {
+  display: flex;
+  margin-top: -1.8518518519vw;
+}
+.line:nth-child(even) {
+  transform: translateX(-5.5555555556vw);
+}
+
+.item {
+  width: 11.1111111111vw;
+  height: 11.1111111111vw;
+  flex-shrink: 0;
+  background: rgba(191, 154, 154, 0.5);
+  clip-path: polygon(50% 0%, 95% 25%, 95% 75%, 50% 95%, 0% 75%, 0% 25%);
+}
+
+/*# sourceMappingURL=index.css.map */

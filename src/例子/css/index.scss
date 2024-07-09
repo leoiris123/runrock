@@ -1,0 +1,35 @@
+$n:9;
+$size:calc(100vw / $n);
+
+.container {
+
+    overflow: hidden;
+}
+
+.line {
+    display: flex;
+    // flex-wrap: wrap;
+    // overflow: hidden;
+    margin-top: - calc($size/6);
+
+    &:nth-child(even) {
+        transform: translateX(- calc($size/2));
+    }
+}
+
+
+// @for $i from 1 through $n {
+//     .item:nth-child(#{$i}) {
+//         width: 100vw/$n*$i;
+//     }
+// }
+
+.item {
+    width: $size;
+    height: $size;
+    flex-shrink: 0;
+    background: rgba($color: #bf9a9a, $alpha: 0.5);
+
+    clip-path: polygon(50% 0%, 95% 25%, 95% 75%, 50% 95%, 0% 75%, 0% 25%);
+
+}

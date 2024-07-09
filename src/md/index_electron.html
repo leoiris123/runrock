@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>ipc &#x8fdb;&#x7a0b;&#x901a;&#x4fe1;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <h1 id="ipc-进程通信">ipc 进程通信</h1>
+<p>首先根据官方文档总结整理了几种进程通信的方式，简单明了，方便记忆。</p>
+<h3 id="1渲染进程--主进程单向">1、渲染进程 → 主进程（单向）</h3>
+<p>方式一：ipcRenderer.send -&gt; ipcMain.on（染进程发送消息至主进程，主进程监听）</p>
+<pre><code class="language-javascript">ipcRenderer.<span class="hljs-title function_">send</span>(<span class="hljs-string">&quot;my_channel&quot;</span>, <span class="hljs-string">&quot;my_data&quot;</span>);
+
+ipcMain.<span class="hljs-title function_">on</span>(<span class="hljs-string">&quot;my_channel&quot;</span>, <span class="hljs-function">(<span class="hljs-params">event, message</span>) =&gt;</span> {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">`receive message from render: <span class="hljs-subst">${message}</span>`</span>);
+});
+</code></pre>
+<h3 id="2渲染进程---主进程双向">2、渲染进程 &lt;-&gt; 主进程（双向）</h3>
+<p>方式一：await ipcRenderer.invoke 发送消息等待 ipcMain.handle 返回结果</p>
+<pre><code class="language-javascript"><span class="hljs-comment">// 渲染进程</span>
+<span class="hljs-keyword">const</span> replyMessage = <span class="hljs-keyword">await</span> ipcRenderer.<span class="hljs-title function_">invoke</span>(<span class="hljs-string">&quot;my_channel&quot;</span>, <span class="hljs-string">&quot;my_data&quot;</span>);
+
+<span class="hljs-comment">// 主进程</span>
+ipcMain.<span class="hljs-title function_">handle</span>(<span class="hljs-string">&quot;my_channel&quot;</span>, <span class="hljs-keyword">async</span> (event, message) =&gt; {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">`receive message from render: <span class="hljs-subst">${message}</span>`</span>);
+  <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;replay&quot;</span>;
+});
+</code></pre>
+<p>方式二：ipcRenderer.send 和 ipcMain.on 配合。这也是 Electron 7 没有 ipcRenderer.invoke 之前通过 IPC 进行异步双向通信的推荐方式。</p>
+<pre><code class="language-javascript"><span class="hljs-comment">// 渲染进程发送和监听返回事件</span>
+ipcRenderer.<span class="hljs-title function_">on</span>(<span class="hljs-string">&quot;asynchronous-reply&quot;</span>, <span class="hljs-function">(<span class="hljs-params">_event, arg</span>) =&gt;</span> {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(arg); <span class="hljs-comment">// 在 DevTools 控制台中打印“pong”</span>
+});
+ipcRenderer.<span class="hljs-title function_">send</span>(<span class="hljs-string">&quot;asynchronous-message&quot;</span>, <span class="hljs-string">&quot;ping&quot;</span>);
+
+<span class="hljs-comment">// 主进程监听</span>
+ipcMain.<span class="hljs-title function_">on</span>(<span class="hljs-string">&quot;asynchronous-message&quot;</span>, <span class="hljs-function">(<span class="hljs-params">event, arg</span>) =&gt;</span> {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(arg); <span class="hljs-comment">// 在 Node 控制台中打印“ping”</span>
+  <span class="hljs-comment">// 作用如同 `send`，但返回一个消息</span>
+  <span class="hljs-comment">// 到发送原始消息的渲染器</span>
+  event.<span class="hljs-title function_">reply</span>(<span class="hljs-string">&quot;asynchronous-reply&quot;</span>, <span class="hljs-string">&quot;pong&quot;</span>);
+});
+</code></pre>
+<p>方式三：ipcRenderer.sendSync 向主进程发送消息，并同步等待响。同步特性意味着它将阻塞渲染器进程</p>
+<pre><code class="language-javascript"><span class="hljs-comment">// 渲染进程发送</span>
+<span class="hljs-keyword">const</span> result = ipcRenderer.<span class="hljs-title function_">sendSync</span>(<span class="hljs-string">&quot;synchronous-message&quot;</span>, <span class="hljs-string">&quot;ping&quot;</span>);
+
+<span class="hljs-comment">// 主进程监听</span>
+ipcMain.<span class="hljs-title function_">on</span>(<span class="hljs-string">&quot;synchronous-message&quot;</span>, <span class="hljs-function">(<span class="hljs-params">event, arg</span>) =&gt;</span> {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(arg); <span class="hljs-comment">// 在 Node 控制台中打印“ping”</span>
+  event.<span class="hljs-property">returnValue</span> = <span class="hljs-string">&quot;pong&quot;</span>;
+});
+</code></pre>
+<h3 id="3主进程--渲染进程">3、主进程 → 渲染进程</h3>
+<p>方式一：webContents.send，主进程使用 BrowserWindow.webContents.send 向渲染进程发送消息</p>
+<pre><code class="language-javascript"><span class="hljs-keyword">const</span> mainWindow = <span class="hljs-keyword">new</span> <span class="hljs-title class_">BrowserWindow</span>();
+mainWindow.<span class="hljs-property">webContents</span>.<span class="hljs-title function_">send</span>(<span class="hljs-string">&quot;messageToRenderer&quot;</span>, <span class="hljs-string">&quot;Hello from Main!&quot;</span>);
+</code></pre>
+<p>方式二：ipcMain 模块监听来自渲染进程事件，通过 event.sender.send 方法向渲染进程发送消息</p>
+<pre><code class="language-javascript">ipcMain.<span class="hljs-title function_">on</span>(<span class="hljs-string">&quot;messageFromMain&quot;</span>, <span class="hljs-function">(<span class="hljs-params">event, arg</span>) =&gt;</span> {
+  event.<span class="hljs-property">sender</span>.<span class="hljs-title function_">send</span>(<span class="hljs-string">&quot;messageToRenderer&quot;</span>, <span class="hljs-string">&quot;Hello from Main!&quot;</span>);
+});
+</code></pre>
+<h3 id="4渲染进程--渲染进程">4、渲染进程 → 渲染进程</h3>
+<p>方式一：将主进程作为渲染器之间的消息代理</p>
+<pre><code class="language-javascript"><span class="hljs-comment">// 主进程监听渲染进程A消息，将消息发送给另一个渲染进程B</span>
+ipcMain.<span class="hljs-title function_">on</span>(<span class="hljs-string">&quot;win1-msg&quot;</span>, <span class="hljs-function">(<span class="hljs-params">event, arg</span>) =&gt;</span> {
+  <span class="hljs-comment">// 这条消息来自 window 1</span>
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;name inside main process is: &quot;</span>, arg);
+  <span class="hljs-comment">// 发送给 window 2 的消息.</span>
+  window2.<span class="hljs-property">webContents</span>.<span class="hljs-title function_">send</span>(<span class="hljs-string">&quot;forWin2&quot;</span>, arg);
+});
+
+<span class="hljs-comment">// 渲染进程A发送消息</span>
+ipcRenderer.<span class="hljs-title function_">send</span>(<span class="hljs-string">&quot;win1-msg&quot;</span>, <span class="hljs-string">&quot;msg from win1&quot;</span>);
+
+<span class="hljs-comment">// 在另一个渲染进程B中注册监听事件</span>
+ipcRenderer.<span class="hljs-title function_">on</span>(<span class="hljs-string">&quot;forWin2&quot;</span>, <span class="hljs-keyword">function</span> (<span class="hljs-params">event, arg</span>) {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(arg);
+});
+</code></pre>
+<p>方式二：从主进程将一个 MessagePort 传递到两个渲染器。 允许在初始设置后渲染器之间直接进行通信。</p>
+<p><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/MessagePort" title=" MessagePort - Web API 接口参考 | MDN Channel Messaging API 的 MessagePort 接口代表 MessageChannel 的两个端口之一，它可以让你从一个端口发送消息，并在消息到达的另一个端口监听它们。 https://developer.mozilla.org/zh-CN/docs/Web/API/MessagePort"> MessagePort - Web API 接口参考 | MDN Channel Messaging API 的 MessagePort 接口代表 MessageChannel 的两个端口之一，它可以让你从一个端口发送消息，并在消息到达的另一个端口监听它们。 https://developer.mozilla.org/zh-CN/docs/Web/API/MessagePort</a></p>
+<p>在各自的 preload.javascript 文件中注入 port</p>
+<pre><code class="language-javascript"><span class="hljs-keyword">const</span> { ipcRenderer } = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;electron&quot;</span>);
+
+ipcRenderer.<span class="hljs-title function_">on</span>(<span class="hljs-string">&quot;port&quot;</span>, <span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> {
+  <span class="hljs-comment">// port received, make it globally available.</span>
+  <span class="hljs-variable language_">window</span>.<span class="hljs-property">electronMessagePort</span> = e.<span class="hljs-property">ports</span>[<span class="hljs-number">0</span>];
+
+  <span class="hljs-variable language_">window</span>.<span class="hljs-property">electronMessagePort</span>.<span class="hljs-property">onmessage</span> = <span class="hljs-function">(<span class="hljs-params">messageEvent</span>) =&gt;</span> {
+    <span class="hljs-comment">// handle message</span>
+  };
+});
+</code></pre>
+<p>窗口准备就绪下发 port 给每个渲染进程</p>
+<pre><code class="language-javascript"><span class="hljs-keyword">const</span> { <span class="hljs-title class_">BrowserWindow</span>, app, <span class="hljs-title class_">MessageChannelMain</span> } = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;electron&quot;</span>);
+
+app.<span class="hljs-title function_">whenReady</span>().<span class="hljs-title function_">then</span>(<span class="hljs-keyword">async</span> () =&gt; {
+  <span class="hljs-comment">// create the windows.</span>
+  <span class="hljs-keyword">const</span> mainWindow = <span class="hljs-keyword">new</span> <span class="hljs-title class_">BrowserWindow</span>({
+    <span class="hljs-attr">show</span>: <span class="hljs-literal">false</span>,
+    <span class="hljs-attr">webPreferences</span>: {
+      <span class="hljs-attr">contextIsolation</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">preload</span>: <span class="hljs-string">&quot;preloadMain.javascript&quot;</span>,
+    },
+  });
+
+  <span class="hljs-keyword">const</span> secondaryWindow = <span class="hljs-keyword">new</span> <span class="hljs-title class_">BrowserWindow</span>({
+    <span class="hljs-attr">show</span>: <span class="hljs-literal">false</span>,
+    <span class="hljs-attr">webPreferences</span>: {
+      <span class="hljs-attr">contextIsolation</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">preload</span>: <span class="hljs-string">&quot;preloadSecondary.javascript&quot;</span>,
+    },
+  });
+
+  <span class="hljs-comment">// set up the channel.</span>
+  <span class="hljs-keyword">const</span> { port1, port2 } = <span class="hljs-keyword">new</span> <span class="hljs-title class_">MessageChannelMain</span>();
+
+  <span class="hljs-comment">// once the webContents are ready, send a port to each webContents with postMessage.</span>
+  mainWindow.<span class="hljs-title function_">once</span>(<span class="hljs-string">&quot;ready-to-show&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    mainWindow.<span class="hljs-property">webContents</span>.<span class="hljs-title function_">postMessage</span>(<span class="hljs-string">&quot;port&quot;</span>, <span class="hljs-literal">null</span>, [port1]);
+  });
+
+  secondaryWindow.<span class="hljs-title function_">once</span>(<span class="hljs-string">&quot;ready-to-show&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    secondaryWindow.<span class="hljs-property">webContents</span>.<span class="hljs-title function_">postMessage</span>(<span class="hljs-string">&quot;port&quot;</span>, <span class="hljs-literal">null</span>, [port2]);
+  });
+});
+</code></pre>
+<p>渲染进程发送至渲染进程</p>
+<pre><code class="language-javascript"><span class="hljs-comment">// elsewhere in your code to send a message to the other renderers message handler</span>
+<span class="hljs-variable language_">window</span>.<span class="hljs-property">electronMessagePort</span>.<span class="hljs-title function_">postMessage</span>(<span class="hljs-string">&quot;ping&quot;</span>);
+</code></pre>
+<p>如何封装一个通用的进程通信模块？</p>
+<p>整体思路</p>
+<p>为了在渲染进程和主进程中进行统一的通信调用和简化事件通道管理，需要导出相同的 api 来使用。采用方案：主进程使用 ipcManager.ts 来导出 on、send、invoke、handle 等方法给主进程调用，渲染进程使用 ipcService.ts 导出类似的 api，但是需要通过 preload 的 contextBridge.exposeInMainWorld 将 api 暴露给渲染进程进行调用。</p>
+<p>这里需要注意</p>
+<p>1、不能在主进程中访问 window 对象，否则会报错 window is not defined。因为 window 是渲染进程中定义的。</p>
+<p>2、不能在渲染进程中调用主进程的对象，否则会报错 __dirname is not defined</p>
+<pre><code class="language-txt">https://www.electronjs.org/zh/docs/latest/tutorial/ipc
+</code></pre>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+            
+        </body>
+        </html>
